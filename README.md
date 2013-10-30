@@ -1,7 +1,7 @@
 Vagrant e Hadoop
 ==============
 
-Este é um projeto para auxiliar que deseja montar um cluster em uma única máquina utilizando Virtual Box como provider das VMs e configurar a distribuição CDH (da Cloudera) do Apache Hadoop neste cluster.
+Este é um projeto para auxiliar quem deseja montar um cluster em uma única máquina utilizando Virtual Box como provider das VMs e configurar a distribuição CDH (da Cloudera) do Apache Hadoop neste cluster.
 
 Como configurar VMs VirtualBox com Vagrant?
 ------------------------------------------
