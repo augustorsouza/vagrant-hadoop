@@ -1,6 +1,8 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+memsize = ENV["MEMSIZE"] || "3072"
+
 $master_script = <<SCRIPT
 #!/bin/bash
 cat > /etc/hosts <<EOF
@@ -90,11 +92,11 @@ Vagrant.configure("2") do |config|
   config.vm.define :master do |master|
     master.vm.box = "precise64"
     master.vm.provider "virtualbox" do |v|
-      v.vmx["memsize"]  = "3072"
+      v.vmx["memsize"]  = memsize
     end
     master.vm.provider :virtualbox do |v|
       v.name = "vm-cluster-node1"
-      v.customize ["modifyvm", :id, "--memory", "3072"]
+      v.customize ["modifyvm", :id, "--memory", memsize]
     end
     master.vm.network :private_network, ip: "10.211.55.100"
     master.vm.hostname = "vm-cluster-node1"
@@ -104,11 +106,11 @@ Vagrant.configure("2") do |config|
   config.vm.define :slave1 do |slave1|
     slave1.vm.box = "precise64"
     slave1.vm.provider "virtualbox" do |v|
-      v.vmx["memsize"]  = "3072"
+      v.vmx["memsize"]  = memsize
     end
     slave1.vm.provider :virtualbox do |v|
       v.name = "vm-cluster-node2"
-      v.customize ["modifyvm", :id, "--memory", "3072"]
+      v.customize ["modifyvm", :id, "--memory", memsize]
     end
     slave1.vm.network :private_network, ip: "10.211.55.101"
     slave1.vm.hostname = "vm-cluster-node2"
@@ -118,11 +120,11 @@ Vagrant.configure("2") do |config|
   config.vm.define :slave2 do |slave2|
     slave2.vm.box = "precise64"
     slave2.vm.provider "virtualbox" do |v|
-      v.vmx["memsize"]  = "3072"
+      v.vmx["memsize"]  = memsize
     end
     slave2.vm.provider :virtualbox do |v|
       v.name = "vm-cluster-node3"
-      v.customize ["modifyvm", :id, "--memory", "3072"]
+      v.customize ["modifyvm", :id, "--memory", memsize]
     end
     slave2.vm.network :private_network, ip: "10.211.55.102"
     slave2.vm.hostname = "vm-cluster-node3"
@@ -132,11 +134,11 @@ Vagrant.configure("2") do |config|
   config.vm.define :slave3 do |slave3|
     slave3.vm.box = "precise64"
     slave3.vm.provider "virtualbox" do |v|
-      v.vmx["memsize"]  = "3072"
+      v.vmx["memsize"]  = memsize
     end
     slave3.vm.provider :virtualbox do |v|
       v.name = "vm-cluster-node4"
-      v.customize ["modifyvm", :id, "--memory", "3072"]
+      v.customize ["modifyvm", :id, "--memory", memsize]
     end
     slave3.vm.network :private_network, ip: "10.211.55.103"
     slave3.vm.hostname = "vm-cluster-node4"
@@ -146,11 +148,11 @@ Vagrant.configure("2") do |config|
   config.vm.define :slave4 do |slave4|
     slave4.vm.box = "precise64"
     slave4.vm.provider "virtualbox" do |v|
-      v.vmx["memsize"]  = "3072"
+      v.vmx["memsize"]  = memsize
     end
     slave4.vm.provider :virtualbox do |v|
       v.name = "vm-cluster-node5"
-      v.customize ["modifyvm", :id, "--memory", "3072"]
+      v.customize ["modifyvm", :id, "--memory", memsize]
     end
     slave4.vm.network :private_network, ip: "10.211.55.104"
     slave4.vm.hostname = "vm-cluster-node5"
@@ -160,11 +162,11 @@ Vagrant.configure("2") do |config|
   config.vm.define :client do |client|
     client.vm.box = "precise64"
     client.vm.provider "virtualbox" do |v|
-      v.vmx["memsize"]  = "3072"
+      v.vmx["memsize"]  = memsize
     end
     client.vm.provider :virtualbox do |v|
       v.name = "vm-cluster-client"
-      v.customize ["modifyvm", :id, "--memory", "3072"]
+      v.customize ["modifyvm", :id, "--memory", memsize]
     end
     client.vm.network :private_network, ip: "10.211.55.105"
     client.vm.hostname = "vm-cluster-client"
