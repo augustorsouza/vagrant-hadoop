@@ -2,6 +2,18 @@
 # vi: set ft=ruby :
 
 memsize = ENV["MEMSIZE"] || "3072"
+slaves = ENV["SLAVES"] || 2
+
+ips = ""
+
+# slaves + 1 master + 1 client
+(slaves + 1 + 1).times do |i|
+  if (i == slaves + 1) # last element
+    ips += "10.211.55.10#{i}   vm-cluster-client\n"
+  else
+    ips += "10.211.55.10#{i}   vm-cluster-node#{i+1}\n"
+  end
+end
 
 $master_script = <<SCRIPT
 #!/bin/bash
@@ -15,12 +27,7 @@ ff00::0 ip6-mcastprefix
 ff02::1 ip6-allnodes
 ff02::2 ip6-allrouters
 
-10.211.55.100   vm-cluster-node1
-10.211.55.101   vm-cluster-node2
-10.211.55.102   vm-cluster-node3
-10.211.55.103   vm-cluster-node4
-10.211.55.104   vm-cluster-node5
-10.211.55.105   vm-cluster-client
+#{ips}
 EOF
 
 apt-get install curl -y
@@ -58,12 +65,7 @@ ff00::0 ip6-mcastprefix
 ff02::1 ip6-allnodes
 ff02::2 ip6-allrouters
 
-10.211.55.100   vm-cluster-node1
-10.211.55.101   vm-cluster-node2
-10.211.55.102   vm-cluster-node3
-10.211.55.103   vm-cluster-node4
-10.211.55.104   vm-cluster-node5
-10.211.55.105   vm-cluster-client
+#{ips}
 EOF
 SCRIPT
 
@@ -78,12 +80,7 @@ ff00::0 ip6-mcastprefix
 ff02::1 ip6-allnodes
 ff02::2 ip6-allrouters
 
-10.211.55.100   vm-cluster-node1
-10.211.55.101   vm-cluster-node2
-10.211.55.102   vm-cluster-node3
-10.211.55.103   vm-cluster-node4
-10.211.55.104   vm-cluster-node5
-10.211.55.105   vm-cluster-client
+#{ips}
 EOF
 SCRIPT
 
@@ -103,62 +100,22 @@ Vagrant.configure("2") do |config|
     master.vm.provision :shell, :inline => $master_script
   end
 
-  config.vm.define :slave1 do |slave1|
-    slave1.vm.box = "precise64"
-    slave1.vm.provider "virtualbox" do |v|
-      v.vmx["memsize"]  = memsize
+  slaves.times do |i|
+    config.vm.define "slave#{i+1}" do |slave|
+      slave.vm.box = "precise64"
+      slave.vm.provider "virtualbox" do |v|
+        v.vmx["memsize"]  = memsize
+      end
+      slave.vm.provider :virtualbox do |v|
+        v.name = "vm-cluster-node#{i+2}"
+        v.customize ["modifyvm", :id, "--memory", memsize]
+      end
+      slave.vm.network :private_network, ip: "10.211.55.10#{i+1}"
+      slave.vm.hostname = "vm-cluster-node#{i+2}"
+      slave.vm.provision :shell, :inline => $slave_script
     end
-    slave1.vm.provider :virtualbox do |v|
-      v.name = "vm-cluster-node2"
-      v.customize ["modifyvm", :id, "--memory", memsize]
-    end
-    slave1.vm.network :private_network, ip: "10.211.55.101"
-    slave1.vm.hostname = "vm-cluster-node2"
-    slave1.vm.provision :shell, :inline => $slave_script
   end
-
-  config.vm.define :slave2 do |slave2|
-    slave2.vm.box = "precise64"
-    slave2.vm.provider "virtualbox" do |v|
-      v.vmx["memsize"]  = memsize
-    end
-    slave2.vm.provider :virtualbox do |v|
-      v.name = "vm-cluster-node3"
-      v.customize ["modifyvm", :id, "--memory", memsize]
-    end
-    slave2.vm.network :private_network, ip: "10.211.55.102"
-    slave2.vm.hostname = "vm-cluster-node3"
-    slave2.vm.provision :shell, :inline => $slave_script
-  end
-
-  config.vm.define :slave3 do |slave3|
-    slave3.vm.box = "precise64"
-    slave3.vm.provider "virtualbox" do |v|
-      v.vmx["memsize"]  = memsize
-    end
-    slave3.vm.provider :virtualbox do |v|
-      v.name = "vm-cluster-node4"
-      v.customize ["modifyvm", :id, "--memory", memsize]
-    end
-    slave3.vm.network :private_network, ip: "10.211.55.103"
-    slave3.vm.hostname = "vm-cluster-node4"
-    slave3.vm.provision :shell, :inline => $slave_script
-  end
-
-  config.vm.define :slave4 do |slave4|
-    slave4.vm.box = "precise64"
-    slave4.vm.provider "virtualbox" do |v|
-      v.vmx["memsize"]  = memsize
-    end
-    slave4.vm.provider :virtualbox do |v|
-      v.name = "vm-cluster-node5"
-      v.customize ["modifyvm", :id, "--memory", memsize]
-    end
-    slave4.vm.network :private_network, ip: "10.211.55.104"
-    slave4.vm.hostname = "vm-cluster-node5"
-    slave4.vm.provision :shell, :inline => $slave_script
-  end
-
+  
   config.vm.define :client do |client|
     client.vm.box = "precise64"
     client.vm.provider "virtualbox" do |v|
@@ -168,9 +125,14 @@ Vagrant.configure("2") do |config|
       v.name = "vm-cluster-client"
       v.customize ["modifyvm", :id, "--memory", memsize]
     end
-    client.vm.network :private_network, ip: "10.211.55.105"
+    client.vm.network :private_network, ip: "10.211.55.10#{slaves + 1}"
     client.vm.hostname = "vm-cluster-client"
     client.vm.provision :shell, :inline => $client_script
   end
 
 end
+
+puts %{
+Please, make sure the following IPs are listed in your /etc/hosts file...
+#{ips}
+}
